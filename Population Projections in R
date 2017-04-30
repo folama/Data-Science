@@ -1,0 +1,529 @@
+####### Decomposing the contribution of   #########
+####### Age structure versus Age Specific #########
+####### Age Specific Production and Consumption ###
+####### in the Demographic Dividend       #########                      
+#######       Nov 11, 2016                #########
+
+
+##Install and load necessary packages
+
+install.packages("devtools")
+install.packages("foreign")
+install.packages("xtable")
+install.packages("dplyr")
+install.packages("reshape2")
+install.packages("lattice")
+install.packages("ggplot2")
+
+##Load required packages
+library(haven)
+library(lattice)
+library(ggplot2)
+
+library(devtools)
+install_github("timriffe/DecompHoriuchi/DecompHoriuchi")
+library(DecompHoriuchi)
+
+library(foreign)
+library(xtable)
+
+
+#Load in overall data and add labels
+#install and load package to load STATA14 data
+install.packages("haven")
+library(haven)
+
+
+#------------------------------------------------------
+
+##PLOT AGE STRUCTURE OF THE POPULATION
+
+##Create a 2x2 grid with 4 graphs, one for each year with 7 country lines 
+
+data<-read_dta("C:/Users/M/~")
+
+##Get subset of the original data for graphs
+newdata <- subset(data, year == 1970 | year == 2000 | year ==2050 | year==2100, 
+                  select=c(year, country, age, N_pop, Nx_proportion))
+
+newdata <- within(newdata, {
+   year <- factor (year)
+  country <- factor(country, levels = 1:7, labels = c("Ethiopia", "Ghana", " Kenya", "Moz", "Nigeria", "Senegal", "SA"))
+  age <- factor(age, levels = 1:19, labels = c("0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90+"))
+})
+
+head(newdata)
+summary(newdata)
+
+##Create condition to identify each country and year
+con1=newdata$country=="Ethiopia"
+con2=newdata$country=="Ghana"
+con3=newdata$country==" Kenya"
+con4=newdata$country=="Moz"
+con5=newdata$country=="Nigeria"
+con6=newdata$country=="Senegal"
+con7=newdata$country=="SA"
+
+con1 ##shows you all the obs for which the condition is true
+con2
+con3
+con4
+con5
+con6
+con7
+
+#change the line width of a graph 
+lw=2
+lty=1
+
+y1=newdata$year=="1970"
+y2=newdata$year=="2000"
+y3=newdata$year=="2050"
+y4=newdata$year=="2100"
+
+y1
+y2
+y3
+y4
+
+#define parameter for graph: 2 rows, 2 columns
+par(mfrow=c(2,2))
+
+##1st Year Plot
+#plot empty x and y, no type, set the limits for the x and y axis
+#create bold labels for the axis and the main plot
+plot(0,0,type="n",xlim=c(0,90), ylim=c(0,.25),
+xlab=expression(bold("Age")), ylab=expression(bold("Prop. of Pop.")),
+main="1970")
+
+#Create Gridlines 
+#line, horizontal/vert, sequence of lines, point 0 to 0.3 @0.10 intervals, line color grey - the higher the lighter
+abline(h=seq(0,.3,.05),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con1 & y1],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con2 & y1],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con3 & y1],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con4 & y1],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con5 & y1],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con6 & y1],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con7 & y1],lty=1, col=7, lwd=lw)
+
+
+#Add a Legend
+legend("topright",fill=1:7,legend=levels(newdata$country),bty='n',ncol=2,cex=0.8)
+
+
+##2nd Year Plot
+plot(0,0,type="n",xlim=c(0,90), ylim=c(0,.25),
+xlab=expression(bold("Age")), ylab=expression(bold("Prop.  of Pop.")),
+main="2000")
+
+abline(h=seq(0,.3,.05),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con1 & y2],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con2 & y2],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con3 & y2],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con4 & y2],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con5 & y2],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con6 & y2],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con7 & y2],lty=1, col=7, lwd=lw)
+
+
+##3rd Year Plot
+plot(0,0,type="n",xlim=c(0,90), ylim=c(0,.25),
+xlab=expression(bold("Age")), ylab=expression(bold("Prop. of Pop.")),
+main="2050")
+
+abline(h=seq(0,.3,.05),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con1 & y3],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con2 & y3],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con3 & y3],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con4 & y3],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con5 & y3],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con6 & y3],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con7 & y3],lty=1, col=7, lwd=lw)
+
+
+
+##4th Year Plot
+plot(0,0,type="n",xlim=c(0,90), ylim=c(0,.25),
+xlab=expression(bold("Age")), ylab=expression(bold("Prop. of Pop.")),
+main="2100")
+
+abline(h=seq(0,.3,.05),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con1 & y4],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con2 & y4],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con3 & y4],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con4 & y4],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con5 & y4],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con6 & y4],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), newdata$Nx_proportion[con7 & y4],lty=1, col=7, lwd=lw)
+
+#Add a Legend
+legend("topright",fill=1:7,legend=levels(newdata$country),bty='n',ncol=2,cex=0.8)
+
+
+#------------------------------------------------------------------------
+
+
+##PLOT AGE PROFILE OF PRODUCTION AND CONSUMPTION
+
+data<-read_dta("C:/Users/M/Documents/Y2_Paper/Data/7_LCD_analysis.dta")
+head(data)
+
+data <- within(data, {
+  country <- factor(country, levels = 1:7, labels = c("Ethiopia(2005)", "Ghana(2005)", " Kenya(1994)", "Moz(2008)", "Nigeria(2004)", "Senegal(2005)", "SA(2005)"))
+  age <- factor(age, levels = 1:19, labels = c("0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90+"))
+})
+
+head(data)
+summary(data)
+#ly: min-0, max-1.26
+#c: min-0, max-0.9
+#lcd: min- -0.89 max- 0.87
+
+
+#Plot 1 - Labour income age profile for African NTA countries; 
+#presented as labour income per capita relative to the average labour income in the 30–49 age group 
+
+##Create condition to identify each country
+con1=data$country=="Ethiopia(2005)"
+con2=data$country=="Ghana(2005)"
+con3=data$country==" Kenya(1994)"
+con4=data$country=="Moz(2008)"
+con5=data$country=="Nigeria(2004)"
+con6=data$country=="Senegal(2005)"
+con7=data$country=="SA(2005)"
+
+con1 ##shows you all the obs for which the condition is true
+con2
+con3
+con4
+con5
+con6
+con7
+
+#line width and type
+lw=2
+lty=1
+
+##Production (LY) Plot
+plot(0,0,type="n",xlim=c(0,90), ylim=c(0,1.50),
+xlab=expression("Age"), ylab=expression("Labor Income Per Capita / Avg. Labor Income (30-49)"),
+main="Labor Income Profiles for African NTA Countries")
+
+#Gridlines - line, horizontal/vert, sequence of lines, point 0 to 0.3 @0.10 intervals, line color grey - the higher the lighter
+abline(h=seq(0,1.5,.1),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), data$ly[con1],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), data$ly[con2],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), data$ly[con3],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), data$ly[con4],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), data$ly[con5],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), data$ly[con6],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), data$ly[con7],lty=1, col=7, lwd=lw)
+
+#Add Legend
+legend("topright",fill=1:7,legend=levels(data$country),bty='n',ncol=1,cex=0.6)
+
+
+#Plot 2 - Consumption age profile for African NTA countries; 
+
+plot(0,0,type="n",xlim=c(0,90), ylim=c(0,1.3),
+xlab=expression("Age"), ylab=expression("Consumption Per Capita / Avg. Labor Income (30-49)"),
+main="Consumption Profiles for African NTA Countries")
+
+#Gridlines - line, horizontal/vert, sequence of lines, point 0 to 0.3 @0.10 intervals, line color grey - the higher the lighter
+abline(h=seq(0,1.3,.1),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), data$c[con1],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), data$c[con2],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), data$c[con3],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), data$c[con4],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), data$c[con5],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), data$c[con6],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), data$c[con7],lty=1, col=7, lwd=lw)
+
+#Add Legend
+legend("topright",fill=1:7,legend=levels(data$country),bty='n',ncol=1,cex=0.6)
+
+
+#Plot 3 - Life Cycle Deficit for African NTA Countries
+#lcd: min- -0.89 max- 0.87
+
+head(data)
+summary(data)
+
+plot(0,0,type="n",xlim=c(0,90), ylim=c(-1.5,1.5),
+xlab=expression("Age"), ylab=expression("Life Cycle Deficit Per Capita / Avg. Labor Income (30-49)"),
+main="Life Cycle Deficit Age Profiles for African NTA Countries")
+
+#Gridlines - line, horizontal/vert, sequence of lines, point 0 to 0.3 @0.10 intervals, line color grey - the higher the lighter
+abline(h=seq(-1.5,1.5,.5),col='gray90')
+abline(v=seq(0,90,10),col='gray90')
+abline(h=0.00, col="black")
+
+#add country lines-give sequence and interval for the age var, variables to plot, line type, line color
+lines(seq(2.5,92.5,5), data$lcd[con1],lty=1, col=1, lwd=lw)
+lines(seq(2.5,92.5,5), data$lcd[con2],lty=1, col=2, lwd=lw)
+lines(seq(2.5,92.5,5), data$lcd[con3],lty=1, col=3, lwd=lw)
+lines(seq(2.5,92.5,5), data$lcd[con4],lty=1, col=4, lwd=lw)
+lines(seq(2.5,92.5,5), data$lcd[con5],lty=1, col=5, lwd=lw)
+lines(seq(2.5,92.5,5), data$lcd[con6],lty=1, col=6, lwd=lw)
+lines(seq(2.5,92.5,5), data$lcd[con7],lty=1, col=7, lwd=lw)
+
+#Add Legend
+legend("topright",fill=1:7,legend=levels(data$country),bty='n',ncol=1,cex=0.6)
+
+
+
+#-------------------------------------------------------
+
+##PLOT SUPPORT RATIO AND GROWTH IN SR (DEMOG DIV)
+
+data <-read_dta("C:/Users/M/Documents/Y2_Paper/Data/7_DemDiv_analysis.dta")
+head(data)
+
+data <- within(data, {
+  country <- factor(country, levels = 1:7, labels = c("Ethiopia", "Ghana", "Kenya", "Moz", "Nigeria", "Senegal", "SA"))
+  year <- factor(year)
+})
+
+head(data)
+summary(data)
+#SR: 0.48 - 1.36
+
+#Plot 1 - SR for African NTA countries; 
+
+##Create condition to identify each country
+con1=data$country=="Ethiopia"
+con2=data$country=="Ghana"
+con3=data$country=="Kenya"
+con4=data$country=="Moz"
+con5=data$country=="Nigeria"
+con6=data$country=="Senegal"
+con7=data$country=="SA"
+
+con1 ##shows you all the obs for which the condition is true
+con2
+con3
+con4
+con5
+con6
+con7
+
+#line width and type
+lw=2
+lty=1
+
+##SR Plot
+plot(0,0,type="n",xlim=c(1970,2100), ylim=c(0,1.5),
+xlab=expression("Year"), ylab=expression("Support Ratio (SR)"),
+main="Support Ratios for African NTA Countries")
+
+#Gridlines
+abline(h=seq(0,1.5,.1),col='gray90')
+abline(v=seq(1970,2100,10),col='gray90')
+
+#add country lines-give sequence and interval for the year var, variables to plot, line type, line color
+lines(seq(1972.5,2102.5,5), data$SR[con1],lty=1, col=1, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$SR[con2],lty=1, col=2, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$SR[con3],lty=1, col=3, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$SR[con4],lty=1, col=4, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$SR[con5],lty=1, col=5, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$SR[con6],lty=1, col=6, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$SR[con7],lty=1, col=7, lwd=lw)
+
+#checks
+data$SR[con1] #T/F specs
+summary(data$country) #spelling of countries
+seq(1972.5,2102.5,5) #count of obs
+levels(data$country) #spellings
+
+#Add Legend
+legend("bottomright",fill=1:7,legend=levels(data$country),bty='n',ncol=1,cex=0.6)
+
+
+#Plot 2 - Demographic Dividend for African NTA countries
+
+#dem_div: -0.046 to 0.049
+
+plot(0,0,type="n",xlim=c(1970,2100), ylim=c(-0.06,0.06),
+xlab=expression("Year"), ylab=expression("g(L/N)"),
+main="Growth Rate of NTA Support Ratio by African NTA Countries")
+
+#Gridlines
+abline(h=seq(-0.06,0.06,.01),col='gray90')
+abline(v=seq(1970,2100,10),col='gray90')
+abline(h=0.00, col="black")
+
+#add country lines-give sequence and interval for the year var, variables to plot, line type, line color
+lines(seq(1972.5,2102.5,5), data$dem_div[con1],lty=1, col=1, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$dem_div[con2],lty=1, col=2, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$dem_div[con3],lty=1, col=3, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$dem_div[con4],lty=1, col=4, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$dem_div[con5],lty=1, col=5, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$dem_div[con6],lty=1, col=6, lwd=lw)
+lines(seq(1972.5,2102.5,5), data$dem_div[con7],lty=1, col=7, lwd=lw)
+
+#Add Legend
+legend("topright",fill=1:7,legend=levels(data$country),bty='n',ncol=1,cex=0.6)
+
+
+
+
+#-------------------------------------------------------
+
+#STEP 2
+#START DECOMPOSITION
+
+#Prepare data
+
+data<-read_dta("C:/Users/M/Documents/Y2_Paper/Data/NGAvsSA_DecompL_R.dta")
+head(data)
+
+data <- within(data, {
+  age <- factor(age, levels = 1:19, labels = c("0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90"))
+})
+
+summary(data)
+
+#----------------------------------------------------------------------------
+
+
+#STEP 2A
+#Prepare functions
+
+#Write crude prevalence function
+crude_rate <- function(rates) {
+  Nx_lyx <- rates[,1]*rates[,2]
+  crude_rate <- sum(Nx_lyx)
+  return(crude_rate)
+}
+
+
+#STEP 2B
+ama.decomp <- function(overalldata,rate_var,composition_var) {
+  
+  
+  #STEP 2C
+  #Make an age vector
+  age <- seq(0,90,by=5)
+  #already in this sequence in original data
+  
+  #STEP 2D
+  
+  #Subset the data into each period for the rate_var
+  #here also he renames the female & urban var, designated year and kept only the rate vars
+  
+  p1 <- subset(overalldata, year == 2004, 
+               select = c(Nx_proportion,ly))
+  p2 <- subset(overalldata, year == 2005, 
+               select = c(Nx_proportion,ly))
+  
+  
+  #STEP 2E
+  #2005-2050 Decomp
+  d1 <- DecompContinuous(crude_rate,p1,p2,100)
+  dtot <- d1
+  
+  #STEP 2F
+  #Make levels and difference vector
+  #creating a vector containing change from the earliest to last time period
+  #do this for Nigeria - 2004 to 2050
+  change <- c(crude_rate(p1), crude_rate(p2),crude_rate(p2) - crude_rate(p1))
+  names(change)<-c("Time 1", "Time 2", "Change")
+  
+  #STEP 2G
+  #Make contribution matrix (with age)
+  #total change by age
+  contribution <- cbind(age,dtot)
+  
+  #Make a total contribution (absolute) due to each
+  #how much of dtot change was due to rate vs composition
+  abs_rates <- sum(dtot[,1])
+  abs_comp  <- sum(dtot[,2])
+  
+  #Make a fraction of total change variable
+  #change at each age as a fraction or the total change
+  fraction <- cbind(age, dtot / (crude_rate(p2)-crude_rate(p1)))
+  
+  #Make a total fraction due to rates, total due to comp
+  #sum of change due to rates as a fraction of total change
+  fraction_rates <- sum(dtot[,1]) / (crude_rate(p2)-crude_rate(p1))
+  fraction_comp  <- sum(dtot[,2]) / (crude_rate(p2)-crude_rate(p1))
+  
+  #Return the results in a list
+  results = list(change, contribution,abs_rates,abs_comp,fraction,fraction_rates,fraction_comp)
+  names(results) <- c("Difference over time",
+                      "Absolute Contribution",
+                      "Absolute contribution of rates",
+                      "Absolute contribution of compositon",
+                      "Percentage contribution",
+                      "Total percentage contribution of rates", 
+                      "Total percentage contribution of composition")
+  
+  #Return my results
+  return(results)
+  
+}
+
+
+#------------------------------------------------
+
+#STEP 3
+
+#Load in overall data
+#data<-read.dta("analysis/temp/rates.dta")
+
+#Effective Producers (See step 2b where nikkil.decomp function was created)
+#to decomp hypert prevalence for rural men
+#decomp function (data,iswomen=0, isurban=0, "rate var", "composition var"), for all his categories
+#for effective comsumers; #ama.decomp <- function(overalldata,rate_var,composition_var)
+
+
+#Nigeria Effective Consumer Decomposition
+effective_L2 <- ama.decomp(data,"ly","Nx_proportion")
+#same result
+
+#Decomp table
+
+#Show the levels, change, absolute, and relative contributions
+
+#Blank Matrix
+decomp_table2 <- matrix(NA,1,7)
+
+#Load
+
+#Nigeria
+decomp_table2[1,c(1,2,3)] <-effective_L2[[1]]
+decomp_table2[1,4] <-effective_L2[[3]]
+decomp_table2[1,5] <-effective_L2[[6]]
+decomp_table2[1,6] <-effective_L2[[4]]
+decomp_table2[1,7] <-effective_L2[[7]]
+
+
+#Label
+colnames(decomp_table)<-c("2004","2005","Change","Abs","% of tot","Abs","% of tot")
+rownames(decomp_table)<-c("Nigeria vs S. Africa")
+
+#Save
+#C:/Users/M/Documents/Y2_Paper/Data/decomp_table_raw.csv
+write.csv(decomp_table,file = "C:/Users/M/Documents/Y2_Paper/Data/decomp_table_raw.csv") 
+
+
+
