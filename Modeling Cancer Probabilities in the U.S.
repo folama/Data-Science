@@ -1,0 +1,115 @@
+library(aod)
+library(ggplot2)
+library(haven)
+library(colorspace)
+
+#import a subset of the data
+nhis15<-read_dta("C:/Users/M/Documents/DataIncubator2017/samadult_subset.dta")
+head (nhis15)
+
+#canev,sex - binary
+#region (1-ne, 2-mw, 3-south, 4-west), tbsm, smkst - categorical
+#age, bmi, sleep - continuous
+
+summary(nhis15)
+
+## two-way contingency table of categorical outcome and predictors to make sure there are not 0 cells
+xtabs(~canev + region, data=nhis15)
+xtabs(~canev + sex, data=nhis15)
+xtabs(~canev + tbsmkexp, data=nhis15)
+xtabs(~canev + smkstat2, data=nhis15)
+
+#Convert all categorical vars to a factor to indicate they should be treated as a categorical variable.
+nhis15$region<- factor(nhis15$region)
+nhis15$tbsmkexp<- factor(nhis15$tbsmkexp)
+nhis15$smkstat2 <- factor(nhis15$smkstat2)
+
+#Logit model - predict the probability of being diagnosed with cancer
+mylogit <- glm(canev ~ age_p + bmi + asisleep + sex + region + tbsmkexp + smkstat2, data = nhis15, family = "binomial")
+summary(mylogit)
+
+#shows change in the log odds of the outcome for a one unit increase in the predictor variable
+#For every one unit change in age, the log odds of cancer increases by 0.07
+#Being a female versus male, changes the log odds of cancer by -0.278
+#Being in region 2(the mw) versus the NE changes the log odds of cancer by 0.217
+
+#Transform coeeficients to odds for better interpretation
+mylogit.tab <- coef(summary(mylogit ))
+mylogit.tab[, "Estimate"] <- exp(coef(mylogit))
+mylogit.tab
+
+## or odds ratios and 95% CI
+exp(cbind(OR = coef(mylogit), confint(mylogit)))
+#Now we can say that for a one unit increase in age, the odds of having cancer increase by a factor of 1.073.
+
+#-------------------------
+
+#Predicted probabilities 
+
+#First estimate pp of cancer in each region, for females holding age, bmi, sleep constant at their means
+newdata1 <- with(nhis15, data.frame(age_p = mean(age_p), bmi= mean(bmi), asisleep = mean(asisleep), region = factor(1:4), 
+		sex= 1, tbsmkexp = factor(0:3), smkstat2=factor(1:4)))
+
+## view data frame
+newdata1
+
+#Table of predicted probabilities.
+
+newdata1$regionP <- predict(mylogit, newdata = newdata1, type = "response")
+newdata1
+
+#Predicted probability of cancer 0.0317 for women from the west(region=4), 
+#and 0.024 for women from the NE (region=1), holding age, bmi, sleep constant at their means.
+
+#Create a table of predicted probabilities varying the value of age and smoking status. 
+#to plot these, create 100 values of age between 15 and 75, at each value of smoking status (i.e., 1, 2, 3, and 4).
+
+newdata2 <- with(nhis15, data.frame(age_p = rep(seq(from = 15, to = 75, length.out = 100), 4), 
+		bmi= mean(bmi), asisleep = mean(asisleep), region = factor(4), 
+		sex= 1, tbsmkexp = factor(0), smkstat2= factor(rep(1:4, each = 100))))
+    
+
+newdata3 <- cbind(newdata2, predict(mylogit, newdata = newdata2, type = "link",
+    se = TRUE))
+newdata3 <- within(newdata3, {
+    PredictedProb <- plogis(fit)
+    LL <- plogis(fit - (1.96 * se.fit))
+    UL <- plogis(fit + (1.96 * se.fit))
+})
+
+## view first few rows of final dataset
+head(newdata3)
+
+#graphs  predicted probabilities 
+#gplot2 package  
+#plot with the predicted probabilities, and 95% confidence intervals.
+ggplot(newdata3, aes(x = age_p, y = PredictedProb)) + geom_ribbon(aes(ymin = LL,
+    ymax = UL, fill = smkstat2), alpha = 0.2) + geom_line(aes(colour = smkstat2),
+    size = 1)
+
+
+#--------------------------
+
+#Create a table of predicted probabilities varying the value of age and exposure to second hand smoke in the west among women who never smoked 
+
+newdata4 <- with(nhis15, data.frame(age_p = rep(seq(from = 15, to = 75, length.out = 100), 4), 
+		bmi= mean(bmi), asisleep = mean(asisleep), region = factor(4), 
+		sex= 1, smkstat2= factor(4), tbsmkexp = factor(rep(0:3, each = 100))))
+
+newdata5 <- cbind(newdata4, predict(mylogit, newdata = newdata4, type = "link",
+    se = TRUE))
+newdata5 <- within(newdata5, {
+    PredictedProb <- plogis(fit)
+    LL <- plogis(fit - (1.96 * se.fit))
+    UL <- plogis(fit + (1.96 * se.fit))
+})
+
+head(newdata5)
+
+ggplot(newdata5, aes(x = age_p, y = PredictedProb)) + geom_ribbon(aes(ymin = LL,
+    ymax = UL, fill = tbsmkexp), alpha = 0.2) + geom_line(aes(colour = tbsmkexp),
+    size = 1)
+
+
+
+
